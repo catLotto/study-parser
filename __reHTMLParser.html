@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<script type='text/javascript'>
+		
+		const textNode = (text, target) => {
+			
+			const node = { type: 'text', contents: text};
+			return '';
+		};
+		
+		const parser = html => {
+			const result = { type: 'ROOT', children: [] }, stacks = [];
+			let text = '', cursor = 0, stack = result;
+			
+			while (cursor < html.length) {
+				const char = html[cursor++];
+				
+				if (char === '<') {
+					
+					if (text) {
+						const textNode = { type: 'text', contents: text};
+//						console.log('textNode', textNode);
+						stack.children.push(textNode);
+						text = '';
+					}
+					
+					if (html.substr(cursor, 3) === '!--') {
+						const commentNode = { 
+							type: 'comment',
+							contents: html.substring(cursor + 3, cursor = html.indexOf('-->', cursor + 3))
+						};
+//						console.log('commentNode', commentNode);
+						stack.children.push(commentNode);
+						cursor += 3;
+//						console.log('commentNode', html[cursor - 1], html[cursor], html[cursor + 1]);
+						
+					} else if (html[cursor] !== '/') {
+						
+						let rawContents = html.substring(cursor, cursor = html.indexOf('>', cursor));
+						const isClose = html[cursor - 1] === '/';
+						if (isClose) {
+							rawContents = rawContents.substr(0, rawContents.length - 1);
+						}
+						const [ name, ...rawAttributes ] = rawContents.trim().split(' ');
+						
+						const elementNode = {
+							type: 'element',
+							name,
+//							attributes,
+							children: isClose ? null : []
+						};
+//						console.log('elementNode', elementNode);
+						stack.children.push(elementNode);
+						
+						if (!isClose) {
+//							stacks.push(Object.assign(elementNode, { back: stack }));
+							stack = Object.assign(elementNode, { parent: stack });
+						}
+						cursor++;
+						
+					} else if (stack.name === html.substring(cursor + 1, html.indexOf('>', cursor))) {
+//						console.warn('use Parent');
+						const _temp = stack.parent;
+						delete stack.parent;
+//						console.log('back', stack)
+						stack = _temp;
+						cursor = html.indexOf('>', cursor) + 1;
+						
+					} else {
+						throw Error('Parsing Error!');
+						
+					}
+				} else {
+					text += char;
+				}
+//				stack = stacks.pop();
+			}
+			return result;
+		};
+		
+		const example_1 = `<div>
+												123
+												a
+												<article>
+													test
+													<div>
+														123
+														<img />
+													</div>
+													<!--
+														123
+														주석 안의 태그는 무시됩니다.
+														<h1>헤딩 태그도</h1>
+														<div>DIV도</div>
+														싹다 무시됩니다.
+													3-->
+													<section>
+														this test
+														<img />
+														abc
+														<br />
+														and
+														<p>string</p>
+														end	
+													</section>
+												</article>123
+											</div>
+											`;
+		
+		console.log(parser(example_1));
+	</script>
+</head>
+<body>
+	
+</body>
+</html>

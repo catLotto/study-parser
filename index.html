@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<script type='text/javascript' src='./js/HTML-parser.js'></script>
+	<script type='text/javascript'>
+		const example_1 = `<div id="testDiv" class='firstDiv' data-test=test>
+												123
+												<br />
+												a
+												<article>
+													test
+													<div>
+														123
+														<img />
+													</div>
+													<!--
+														123
+														주석 안의 태그는 무시됩니다.
+														<h1>헤딩 태그도</h1>
+														<div>DIV도</div>
+														싹다 무시됩니다.
+													3-->
+													<section>
+														this test
+														<img />
+														abc
+														<br />
+														and
+														<a></a>
+														<p>string</p>
+														end	
+													</section>
+												</article>
+											</div>
+											`;
+		
+		console.log(parser(example_1));
+	</script>
+</head>
+<body abc=145gt b=13 abc=52345t abc=145tg>
+</body>
+</html>
